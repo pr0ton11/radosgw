@@ -22,6 +22,9 @@ env:
 
 jobs:
   check:
+    outputs:
+      upstream: ${{ steps.upstream.outputs.version }}
+      package: ${{ steps.package.outputs.result }}
     name: "Check for updates in upstream"
     runs-on: ubuntu-latest
     steps:
@@ -36,8 +39,6 @@ jobs:
       - name: Get latest alpine package version
         id: upstream
         run: echo "version=$(python AlpinePackageVersion.py -v ${ALPINE_VERSION} -r ${ALPINE_REPO} ${ALPINE_PACKAGE})" | tee $GITHUB_OUTPUT
-      - name: "Log Version"
-        run: echo "Version ${{ steps.upstream.outputs.version }}"
       - name: Get latest built version in this repo
         id: package
         uses: actions/github-script@v6
@@ -55,7 +56,7 @@ jobs:
                 username: context.repo.owner
               })
               const latest = packages.filter((p) => p.metadata.container.tags.includes("latest"))[0];
-              return latest.metadata.container.tags.find((v) => /^v?\d+\.\d+\.\d+$/.test(v)) || '0.0.0-r0'
+              return latest.metadata.container.tags.find((v) => /^v?\d+\.\d+\.\d+\-rd+$/.test(v)) || '0.0.0-r0'
             } catch {
               return '0.0.0-r0'
             }
@@ -64,10 +65,8 @@ jobs:
     name: "Build"
     runs-on: ubuntu-latest
     needs: check
-    if: (needs.check.outputs.upstream.version != needs.check.outputs.package) || github.event_name != 'workflow_dispatch'
+    if: (needs.check.outputs.upstream != needs.check.outputs.package) || github.event_name != 'workflow_dispatch'
     steps:
-      - name: "Build:log:version"
-        run: echo "Version ${{ needs.check.outputs.upstream.version }}"
       - name: "Build:checkout"
         uses: actions/checkout@v3
       - name: "Build:dockerlogin"
@@ -78,7 +77,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: "Build:version"
         id: version
-        run: echo "value=${{ github.event.inputs.version || needs.check.outputs.upstream.version }}" >> $GITHUB_OUTPUT
+        run: echo "value=${{ github.event.inputs.version || needs.check.outputs.upstream }}" >> $GITHUB_OUTPUT
       - name: "Build:dockerversion"
         id: meta
         uses: docker/metadata-action@v4

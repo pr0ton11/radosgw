@@ -34,8 +34,10 @@ jobs:
       - name: Python Requirements
         run: pip install -r requirements.txt
       - name: Get latest alpine package version
-        id: version
-        run: echo "value=$(python AlpinePackageVersion.py -v ${ALPINE_VERSION} -r ${ALPINE_REPO} ${ALPINE_PACKAGE})" | tee $GITHUB_OUTPUT
+        id: upstream
+        run: echo "version=$(python AlpinePackageVersion.py -v ${ALPINE_VERSION} -r ${ALPINE_REPO} ${ALPINE_PACKAGE})" | tee $GITHUB_OUTPUT
+      - name: "Log Version"
+        run: echo "Version ${{ steps.upstream.outputs.version }}"
       - name: Get latest built version in this repo
         id: package
         uses: actions/github-script@v6
@@ -62,10 +64,10 @@ jobs:
     name: "Build"
     runs-on: ubuntu-latest
     needs: check
-    if: (needs.check.outputs.version.value != needs.check.outputs.package) || github.event_name != 'workflow_dispatch'
+    if: (needs.check.outputs.upstream.version != needs.check.outputs.package) || github.event_name != 'workflow_dispatch'
     steps:
       - name: "Build:log:version"
-        run: echo "Version ${{needs.check.outputs.version.value}}"
+        run: echo "Version ${{ needs.check.outputs.upstream.version }}"
       - name: "Build:checkout"
         uses: actions/checkout@v3
       - name: "Build:dockerlogin"
@@ -76,7 +78,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: "Build:version"
         id: version
-        run: echo "value=${{ github.event.inputs.version || needs.check.outputs.version.value }}" >> $GITHUB_OUTPUT
+        run: echo "value=${{ github.event.inputs.version || needs.check.outputs.upstream.version }}" >> $GITHUB_OUTPUT
       - name: "Build:dockerversion"
         id: meta
         uses: docker/metadata-action@v4

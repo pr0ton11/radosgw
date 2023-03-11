@@ -1,0 +1,98 @@
+# CI / CD of pr0ton11 builds
+
+name: 'Build on upstream release'
+
+on:
+  push:
+    branches:
+    - main
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release"
+        required: true
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+  ALPINE_PACKAGE: "ceph17-radosgw"
+  ALPINE_VERSION: "edge"
+  ALPINE_REPO: "community"
+
+jobs:
+  check:
+    name: "Check for updates in upstream"
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.package.outputs.result }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Python Setup
+        uses: actions/setup-python@v2.0.0
+        with:
+          python-version: '3.10'
+      - name: Python Requirements
+        run: pip install -r requirements.txt
+      - name: Get latest alpine package version
+        run: python AlpinePackageVersion.py -v ${ALPINE_VERSION} -r ${ALPINE_REPO} ${ALPINE_PACKAGE}
+        id: version
+      - name: Get latest built version in this repo
+        id: package
+        uses: actions/github-script@v6
+        env:
+          PACKAGE_NAME: radosgw
+          PACKAGE_TYPE: container
+        with:
+          result-encoding: string
+          script: |
+            const {PACKAGE_NAME,PACKAGE_TYPE} = process.env;
+            const {data: packages} = await github.rest.packages.getAllPackageVersionsForPackageOwnedByUser({
+              package_type: PACKAGE_TYPE,
+              package_name: PACKAGE_NAME,
+              username: context.repo.owner
+            })
+            const latest = packages.filter((p) => p.metadata.container.tags.includes("latest"))[0];
+            return latest.metadata.container.tags.find((v) => /^v?\d+\.\d+\.\d+$/.test(v)) || '0.0.0-r0'
+  
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    needs: check
+    if: (needs.check.outputs.version != needs.check.outputs.package) || github.event_name != 'workflow_dispatch'
+    steps:
+      - name: "Build:checkout"
+        uses: actions/checkout@v3
+      - name: "Build:dockerlogin"
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Build:version"
+        id: version
+        run: echo "value=${{ github.event.inputs.version || needs.check.outputs.upstream }}" >> $GITHUB_OUTPUT
+      - name: "Build:dockerversion"
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/pr0ton11/radosgw
+          tags: |
+            type=semver,pattern={{version}},value=${{ steps.version.outputs.value }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.version.outputs.value }}
+            type=semver,pattern={{major}},value=${{ steps.version.outputs.value }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: "Build:dockerimage"
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          build-args: VERSION=${{ steps.version.outputs.value }}
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

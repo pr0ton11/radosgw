@@ -35,9 +35,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: Get latest alpine package version
         id: version
-        run: | 
-          version=$(python AlpinePackageVersion.py -v ${ALPINE_VERSION} -r ${ALPINE_REPO} ${ALPINE_PACKAGE})
-          echo "value=${version}" >> $GITHUB_OUTPUT
+        run: echo "value=$(python AlpinePackageVersion.py -v ${ALPINE_VERSION} -r ${ALPINE_REPO} ${ALPINE_PACKAGE})" | tee $GITHUB_OUTPUT
       - name: Get latest built version in this repo
         id: package
         uses: actions/github-script@v6

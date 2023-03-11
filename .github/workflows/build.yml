@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: "Checkout sources"
         uses: actions/checkout@v3
-      - name: "Build:dockerlogin"
+      - name: "Login to docker registry"
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -80,7 +80,9 @@ jobs:
         run: echo "value=${{ github.event.inputs.version || needs.check.outputs.upstream }}" >> $GITHUB_OUTPUT
       - name: "Set alpine version"
         id: alpine
-        run: echo "value=${ALPINE_VERSION}" >> $GITHUB_OUTPUT
+        run: | 
+          echo "version=${ALPINE_VERSION}" | tee $GITHUB_OUTPUT
+          echo "package=${ALPINE_PACKAGE}" | tee $GITHUB_OUTPUT
       - name: "Set version container labels"
         id: meta
         uses: docker/metadata-action@v4
@@ -99,7 +101,7 @@ jobs:
         with:
           context: .
           push: true
-          build-args: VERSION=${{ steps.version.outputs.value }} ALPINE_VERSION=${{ steps.alpine.outputs.value }}
+          build-args: VERSION=${{ steps.version.outputs.value }} ALPINE_VERSION=${{ steps.alpine.outputs.version }}
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

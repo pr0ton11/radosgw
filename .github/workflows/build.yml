@@ -24,8 +24,6 @@ jobs:
   check:
     name: "Check for updates in upstream"
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.package.outputs.result }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -36,7 +34,9 @@ jobs:
       - name: Python Requirements
         run: pip install -r requirements.txt
       - name: Get latest alpine package version
-        run: python AlpinePackageVersion.py -v ${ALPINE_VERSION} -r ${ALPINE_REPO} ${ALPINE_PACKAGE}
+        run: | 
+          version=$(python AlpinePackageVersion.py -v ${ALPINE_VERSION} -r ${ALPINE_REPO} ${ALPINE_PACKAGE})
+          echo "version=${version}" >> $GITHUB_OUTPUT
         id: version
       - name: Get latest built version in this repo
         id: package
@@ -76,7 +76,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: "Build:version"
         id: version
-        run: echo "value=${{ github.event.inputs.version || needs.check.outputs.upstream }}" >> $GITHUB_OUTPUT
+        run: echo "value=${{ github.event.inputs.version || needs.check.outputs.version }}" >> $GITHUB_OUTPUT
       - name: "Build:dockerversion"
         id: meta
         uses: docker/metadata-action@v4

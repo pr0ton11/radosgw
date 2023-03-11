@@ -67,7 +67,7 @@ jobs:
     if: (needs.check.outputs.version != needs.check.outputs.package) || github.event_name != 'workflow_dispatch'
     steps:
       - name: "Build output version"
-        run: echo "Version ${{needs.check.outputs}}"
+        run: echo "Version ${{needs.check.outputs.version}}"
       - name: "Build:checkout"
         uses: actions/checkout@v3
       - name: "Build:dockerlogin"

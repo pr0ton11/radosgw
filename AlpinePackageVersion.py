@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 from argparse import ArgumentParser
 import requests
 
+### This script queries the version of an alpine package that is available within the Alpine repositories
+### It is used to build CI/CD pipelines baed on released packages within the Alpine repo
+
 ### Package DB
 PACKAGE_DB_URL = "https://pkgs.alpinelinux.org/package"
 
@@ -49,7 +52,7 @@ class AlpinePackage:
                 # Find the td elements
                 data = row.find_all('td')
                 if (len(data) != 1):
-                    print(f"ERR: Parsing package table for package: {self.package}; Invalid Version field length")
+                    print(f"ERR: Parsing package table for package: {self.package}; invalid version field length")
                     exit(1)
                 return data[0].text.strip()
                     

@@ -78,11 +78,12 @@ jobs:
       - name: "Set version"
         id: version
         run: echo "value=${{ github.event.inputs.version || needs.check.outputs.upstream }}" >> $GITHUB_OUTPUT
-      - name: "Set alpine version"
+      - name: "Translate env for alpine version to github variable"
         id: alpine
-        run: | 
-          echo "version=${ALPINE_VERSION}" | tee $GITHUB_OUTPUT
-          echo "package=${ALPINE_PACKAGE}" | tee $GITHUB_OUTPUT
+        run: echo "version=${ALPINE_VERSION}" | tee $GITHUB_OUTPUT
+      - name: "Translate env for radosgw version to github variable"
+        id: radosgw
+        run: echo "package=${ALPINE_PACKAGE}" | tee $GITHUB_OUTPUT
       - name: "Set version container labels"
         id: meta
         uses: docker/metadata-action@v4
@@ -104,7 +105,7 @@ jobs:
           build-args: |
             VERSION=${{ steps.version.outputs.value }}
             ALPINE_VERSION=${{ steps.alpine.outputs.version }}
-            CEPH_RGW_PACKAGE=${{ steps.alpine.outputs.package }}
+            CEPH_RGW_PACKAGE=${{ steps.radosgw.outputs.package }}
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

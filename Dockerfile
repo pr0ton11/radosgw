@@ -11,7 +11,7 @@ RUN apk add --no-cache ${CEPH_RGW_PACKAGE}
 # Configuration
 ENV CEPH_CONFIG /etc/ceph/ceph.conf
 ENV CEPH_CLUSTER_NAME ceph
-ENV RADOSGW_ID 1
+ENV RADOSGW_ID 0
 ENV RADOSGW_TYPE client.radosgw.gateway
 ENV RADOSGW_REGION default
 ENV RADOSGW_ZONE default

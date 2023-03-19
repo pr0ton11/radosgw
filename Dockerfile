@@ -21,4 +21,4 @@ VOLUME [ "/etc/ceph/ceph.conf" ]
 
 # Entrypoint
 COPY --chown=root:root entrypoint.sh /entrypoint.sh
-ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT ["/bin/ash", "/entrypoint.sh" ]

@@ -1,11 +1,13 @@
 # Reference: https://docs.ceph.com/en/latest/man/8/radosgw/
 
-ARG ALPINE_VERSION edge
-ARG CEPH_RGW_PACKAGE ceph17-radosgw
+ARG ALPINE_VERSION=edge
 
 FROM alpine:${ALPINE_VERSION}
 
+ARG CEPH_RGW_PACKAGE=ceph17-radosgw
+
 # Installation of packages
+RUN echo ${CEPH_RGW_PACKAGE}
 RUN apk add --no-cache ${CEPH_RGW_PACKAGE}
 
 # Configuration

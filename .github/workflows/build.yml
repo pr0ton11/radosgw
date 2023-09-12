@@ -86,7 +86,7 @@ jobs:
         run: echo "package=${ALPINE_PACKAGE}" | tee $GITHUB_OUTPUT
       - name: "Set version container labels"
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: |
             ghcr.io/pr0ton11/radosgw

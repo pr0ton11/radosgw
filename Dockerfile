@@ -4,7 +4,7 @@ ARG ALPINE_VERSION=edge
 
 FROM alpine:${ALPINE_VERSION}
 
-ARG CEPH_RGW_PACKAGE=ceph17-radosgw
+ARG CEPH_RGW_PACKAGE=ceph18-radosgw
 
 # Installation of packages
 RUN echo ${CEPH_RGW_PACKAGE}

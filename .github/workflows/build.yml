@@ -16,7 +16,7 @@ on:
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-  ALPINE_PACKAGE: "ceph17-radosgw"
+  ALPINE_PACKAGE: "ceph18-radosgw"
   ALPINE_VERSION: "edge"
   ALPINE_REPO: "community"
 

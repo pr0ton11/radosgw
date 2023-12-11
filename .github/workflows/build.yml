@@ -41,7 +41,7 @@ jobs:
         run: echo "version=$(python AlpinePackageVersion.py -v ${ALPINE_VERSION} -r ${ALPINE_REPO} ${ALPINE_PACKAGE})" | tee $GITHUB_OUTPUT
       - name: Get latest built version in this repo
         id: package
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           PACKAGE_NAME: radosgw
           PACKAGE_TYPE: container

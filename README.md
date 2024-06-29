@@ -31,6 +31,40 @@ RADOSGW_ZONE:  Zone of your Rados Gateway (default: default)
 CEPH_CONFIG:  Path to your ceph.conf within your container (default: /etc/ceph/ceph.conf)
 ```
 
+### Using Ceph CFT
+
+Since release 18.2.2-r5 you can utilize the [Ceph CFT](https://github.com/pr0ton11/ceph-cft) tool, which is embedded into this image.
+
+It allows to configure your ceph cluster with environment variables:
+
+Example:
+
+```
+CEPH_GLOBAL_LOG_FILE='/var/log/ceph/$cluster-$type.$id.log'
+CEPH_OSD_OP_QUEUE=wpq
+CEPH_MON_LOG_TO_SYSLOG=true
+CEPH_TEST_WITHOUT_SECTION=works
+CEPH_CONTAINS_WHITESPACES="Hello World"
+CEPH_OSD__1_OBJECTER_INFLIGHT_OPS=512
+```
+
+```
+[global]
+log_file             = /var/log/ceph/$cluster-$type.$id.log
+test_without_section = works
+contains_whitespaces = "hello world"
+
+[osd]
+op_queue = wpq
+
+[mon]
+log_to_syslog = true
+
+[osd.1]
+objecter_inflight_ops = 512
+```
+
+
 ## How to use this image
 
 This image can be used as a normal docker image with the following tag

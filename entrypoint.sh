@@ -1,5 +1,8 @@
 #!/bin/env ash
 
+# Execute the ceph-cft tool to generate the configuration file based on the environment variables
+ceph-cft
+
 ulimit -S 8096
 
 exec radosgw \

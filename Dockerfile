@@ -23,9 +23,6 @@ ENV RADOSGW_TYPE client.radosgw.gateway
 ENV RADOSGW_REGION default
 ENV RADOSGW_ZONE default
 
-# Ceph configuration to mount
-VOLUME [ "/etc/ceph/ceph.conf" ]
-
 # Entrypoint
 COPY --chown=root:root entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/bin/ash", "/entrypoint.sh" ]

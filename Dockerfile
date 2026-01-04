@@ -5,7 +5,7 @@ ARG ALPINE_VERSION=edge
 FROM ghcr.io/pr0ton11/ceph-cft:main as cft
 FROM alpine:${ALPINE_VERSION}
 
-ARG CEPH_RGW_PACKAGE=ceph18-radosgw
+ARG CEPH_RGW_PACKAGE=ceph19-radosgw
 
 # Install ceph-cft
 COPY --from=cft --chown=root:root /app/ceph-cft /usr/local/bin/ceph-cft
